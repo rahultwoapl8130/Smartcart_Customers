@@ -2,3 +2,5 @@ pandas
 matplotlib
 seaborn
 voila
+jupyter
+ipykernel
