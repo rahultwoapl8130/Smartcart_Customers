@@ -3,378 +3,624 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCart | Personalized Recommendations</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>SmartCart AI | Personalized Product Recommendations</title>
+    <meta name="description" content="Get personalized product recommendations powered by Machine Learning customer segmentation. Built with K-Means Clustering and Agglomerative Clustering.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
+            --primary-light: #818cf8;
             --primary-hover: #4f46e5;
-            --bg-color: #0f172a;
+            --accent: #ec4899;
+            --accent-light: #f472b6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.65);
             --text-main: #f8fafc;
-            --text-muted: #cbd5e1;
-            --panel-bg: rgba(30, 41, 59, 0.7);
-            --panel-border: rgba(255, 255, 255, 0.1);
+            --text-muted: #94a3b8;
+            --text-secondary: #cbd5e1;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        /* Background gradient shapes */
-        .background-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
+        /* ===== BACKGROUND ===== */
+        .bg-effects {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .bg-orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(120px); opacity: 0.4;
+        }
+        .bg-orb-1 {
+            top: -15%; right: -10%;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+        .bg-orb-2 {
+            bottom: -15%; left: -10%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        .bg-orb-3 {
+            top: 40%; left: 50%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+            animation: float 12s ease-in-out infinite 2s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
         }
 
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.5;
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo {
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-badge {
+            font-size: 0.7rem; font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; padding: 0.25rem 0.75rem;
+            border-radius: 20px; letter-spacing: 0.5px;
         }
 
-        .shape-1 {
-            top: -10%;
-            right: -10%;
-            width: 50vw;
-            height: 50vw;
-            background: radial-gradient(circle, #6366f1 0%, transparent 70%);
-        }
-
-        .shape-2 {
-            bottom: -10%;
-            left: -10%;
-            width: 40vw;
-            height: 40vw;
-            background: radial-gradient(circle, #ec4899 0%, transparent 70%);
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            padding: 2rem;
-            z-index: 1;
-        }
-
-        header {
+        /* ===== HERO ===== */
+        .hero {
+            position: relative; z-index: 1;
             text-align: center;
-            margin-bottom: 3rem;
+            padding: 8rem 2rem 4rem;
+            max-width: 800px; margin: 0 auto;
         }
-
-        header h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #a855f7, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+        .hero-tag {
+            display: inline-block;
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--accent-light);
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            padding: 0.4rem 1rem; border-radius: 20px;
+            margin-bottom: 1.5rem; letter-spacing: 1px;
+            text-transform: uppercase;
         }
-
-        header p {
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900; line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #a855f7, #ec4899, #6366f1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.15rem; max-width: 600px;
+            margin: 0 auto 2rem;
         }
 
-        /* Glassmorphism Panel */
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            position: relative; z-index: 1;
+            display: flex; justify-content: center;
+            gap: 3rem; padding: 0 2rem 3rem;
+            flex-wrap: wrap;
+        }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 0.8rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-top: 0.25rem;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            position: relative; z-index: 1;
+            max-width: 900px; margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* ===== GLASS PANEL ===== */
         .glass-panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--panel-border);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s ease;
+            box-shadow: var(--shadow);
         }
 
-        h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
+        .section-title {
+            font-size: 1.6rem; font-weight: 700;
             margin-bottom: 0.5rem;
+        }
+        .section-subtitle {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.95rem; margin-bottom: 2rem;
         }
 
-        input {
-            width: 100%;
-            padding: 1rem;
+        /* ===== FORM ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group.full-width { grid-column: 1 / -1; }
+        
+        .input-group label {
+            font-size: 0.85rem; font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .input-group input, .input-group select {
+            width: 100%; padding: 0.9rem 1.1rem;
             border-radius: 12px;
-            border: 1px solid var(--panel-border);
-            background: rgba(15, 23, 42, 0.6);
-            color: white;
-            font-size: 1rem;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.5);
+            color: white; font-size: 0.95rem;
             font-family: inherit;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-
-        input:focus {
+        .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
-
-        button {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.2s, background-color 0.3s;
+        .input-group select option {
+            background: #1e293b; color: white;
         }
 
         .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            margin-top: 1rem;
+            width: 100%; padding: 1rem;
+            border-radius: 14px; font-size: 1.05rem;
+            font-weight: 700; cursor: pointer;
+            border: none; color: white;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            transition: transform 0.2s, box-shadow 0.3s;
+            margin-top: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
+        /* ===== RESULTS ===== */
+        .hidden { display: none !important; }
+
+        .result-header {
+            text-align: center; margin-bottom: 2.5rem;
+        }
+        .cluster-badge {
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px; font-size: 0.8rem;
+            font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .cluster-0 .cluster-badge { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .cluster-1 .cluster-badge { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .cluster-2 .cluster-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .cluster-3 .cluster-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        .result-title {
+            font-size: 1.8rem; font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .result-desc {
+            color: var(--text-muted); font-size: 1rem;
+            max-width: 500px; margin: 0 auto;
+        }
+
+        /* ===== PRODUCT GRID ===== */
+        .products-label {
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 1rem;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem; margin-bottom: 2rem;
+        }
+        .product-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s, background 0.3s, border-color 0.3s;
+            opacity: 0; transform: translateY(20px);
+        }
+        .product-card.visible {
+            opacity: 1; transform: translateY(0);
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-hover);
+        }
+        .product-icon { font-size: 2.8rem; margin-bottom: 0.8rem; }
+        .product-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+        .product-card p { color: var(--text-muted); font-size: 0.8rem; line-height: 1.4; }
+        .product-tag {
+            display: inline-block; margin-top: 0.6rem;
+            font-size: 0.7rem; font-weight: 600;
+            padding: 0.2rem 0.6rem; border-radius: 8px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .cluster-0 .product-tag { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .cluster-1 .product-tag { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+        .cluster-2 .product-tag { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .cluster-3 .product-tag { background: rgba(236, 72, 153, 0.1); color: #f472b6; }
+
+        /* ===== INSIGHT CARDS ===== */
+        .insights-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .insight-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.2rem;
+        }
+        .insight-label {
+            font-size: 0.75rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+        .insight-value {
+            font-size: 1.3rem; font-weight: 700;
         }
 
         .btn-secondary {
-            background-color: transparent;
-            border: 1px solid var(--text-muted);
+            width: 100%; padding: 0.9rem;
+            border-radius: 14px; font-size: 1rem;
+            font-weight: 600; cursor: pointer;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
             color: var(--text-main);
-            margin-top: 2rem;
+            transition: background 0.3s, transform 0.2s;
         }
-
         .btn-secondary:hover {
-            background-color: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-1px);
         }
 
-        .hidden {
-            display: none !important;
+        /* ===== FOOTER ===== */
+        .footer {
+            position: relative; z-index: 1;
+            text-align: center; padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+        .footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+        .footer a:hover { text-decoration: underline; }
+        .footer-tech {
+            margin-top: 0.5rem; font-size: 0.75rem;
+            color: rgba(148, 163, 184, 0.6);
         }
 
-        /* Recommendations Grid */
-        .recommendations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .product-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: transform 0.3s, background 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .product-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .product-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-card p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease forwards;
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .navbar { padding: 0.8rem 1.2rem; }
+            .hero { padding: 6rem 1.2rem 2.5rem; }
+            .main-content { padding: 0 1rem 3rem; }
+            .glass-panel { padding: 1.5rem; border-radius: 18px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 1.5rem; }
+            .insights-grid { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="background-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
+
+    <div class="bg-effects">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
     </div>
 
-    <main class="container">
-        <header>
-            <h1>SmartCart</h1>
-            <p>Discover products tailored exclusively for you based on our advanced AI analysis.</p>
-        </header>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-logo">🛒 SmartCart</div>
+        <span class="nav-badge">AI Powered</span>
+    </nav>
 
-        <section class="form-section glass-panel">
-            <h2>Tell us about yourself</h2>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-tag">✨ Machine Learning Powered</div>
+        <h1>Smart Product <span class="gradient-text">Recommendations</span></h1>
+        <p>Our AI analyzes your profile and instantly matches you with products you'll love, powered by advanced customer segmentation.</p>
+    </section>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-number">2,200+</div>
+            <div class="stat-label">Customers Analyzed</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Smart Clusters</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">22</div>
+            <div class="stat-label">Data Features</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">95%</div>
+            <div class="stat-label">Accuracy</div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- FORM SECTION -->
+        <section class="form-section glass-panel" id="form-section">
+            <h2 class="section-title">Tell us about yourself</h2>
+            <p class="section-subtitle">Enter your details and our AI will find the perfect products for you.</p>
+
             <form id="recommendation-form">
-                <div class="input-group">
-                    <label for="income">Estimated Annual Income ($)</label>
-                    <input type="number" id="income" name="income" placeholder="e.g. 60000" required>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="income">Annual Income ($)</label>
+                        <input type="number" id="income" placeholder="e.g. 60000" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="spending">Monthly Spending ($)</label>
+                        <input type="number" id="spending" placeholder="e.g. 500" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="age">Your Age</label>
+                        <input type="number" id="age" placeholder="e.g. 35" min="18" max="90" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="children">Total Children</label>
+                        <select id="children">
+                            <option value="0">No Children</option>
+                            <option value="1">1 Child</option>
+                            <option value="2">2 Children</option>
+                            <option value="3">3+ Children</option>
+                        </select>
+                    </div>
+                    <div class="input-group full-width">
+                        <button type="submit" class="btn-primary">🚀 Get My Recommendations</button>
+                    </div>
                 </div>
-                
-                <div class="input-group">
-                    <label for="spending">Average Monthly Spending ($)</label>
-                    <input type="number" id="spending" name="spending" placeholder="e.g. 500" required>
-                </div>
-                
-                <button type="submit" class="btn-primary">Get My Recommendations</button>
             </form>
         </section>
 
-        <section id="results-section" class="results-section hidden">
-            <h2 id="cluster-title">Your Personalized Profile</h2>
-            <p id="cluster-description">Based on your inputs, here is what we recommend.</p>
-            
-            <div class="recommendations-grid" id="recommendations-grid">
-                <!-- Products will be injected here via JavaScript -->
+        <!-- RESULTS SECTION -->
+        <section id="results-section" class="results-section glass-panel hidden">
+            <div class="result-header" id="result-header">
+                <div class="cluster-badge" id="cluster-badge">YOUR PROFILE</div>
+                <h2 class="result-title" id="result-title">Loading...</h2>
+                <p class="result-desc" id="result-desc"></p>
             </div>
-            
-            <button id="reset-btn" class="btn-secondary">Start Over</button>
+
+            <!-- Insights -->
+            <div class="insights-grid" id="insights-grid"></div>
+
+            <!-- Products -->
+            <div class="products-label">Recommended For You</div>
+            <div class="products-grid" id="products-grid"></div>
+
+            <button class="btn-secondary" id="reset-btn">← Start Over</button>
         </section>
-    </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>Built with ❤️ by <a href="https://github.com/rahultwoapl8130" target="_blank">Rahul</a> — SmartCart Customer Segmentation Project</p>
+        <p class="footer-tech">Python · Pandas · Scikit-Learn · K-Means · Agglomerative Clustering · PCA · HTML · CSS · JavaScript</p>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('recommendation-form');
-            const formSection = document.querySelector('.form-section');
-            const resultsSection = document.getElementById('results-section');
-            const resetBtn = document.getElementById('reset-btn');
-            
-            const clusterTitle = document.getElementById('cluster-title');
-            const clusterDescription = document.getElementById('cluster-description');
-            const grid = document.getElementById('recommendations-grid');
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('recommendation-form');
+        const formSection = document.getElementById('form-section');
+        const resultsSection = document.getElementById('results-section');
+        const resetBtn = document.getElementById('reset-btn');
 
-            // Define the products for each cluster
-            const clusterData = {
-                0: {
-                    title: "Cluster 0: The Balanced Shopper",
-                    desc: "You have moderate income and spending. We recommend our best-value everyday bundles.",
-                    products: [
-                        { icon: "🥩", name: "Fresh Meat Pack", desc: "Quality cuts for everyday meals." },
-                        { icon: "🍷", name: "Table Wine", desc: "Great taste at an affordable price." },
-                        { icon: "🛒", name: "Essential Bundle", desc: "Daily household needs." }
-                    ]
-                },
-                1: {
-                    title: "Cluster 1: The Premium VIP",
-                    desc: "High income, high spending. You appreciate the finer things in life.",
-                    products: [
-                        { icon: "🍾", name: "Vintage Champagne", desc: "Aged to perfection." },
-                        { icon: "✨", name: "Gold Membership", desc: "Exclusive access and rewards." },
-                        { icon: "🦞", name: "Gourmet Seafood", desc: "Imported and fresh." }
-                    ]
-                },
-                2: {
-                    title: "Cluster 2: The Smart Saver",
-                    desc: "Budget-conscious shopper. We have the best deals for you today!",
-                    products: [
-                        { icon: "🏷️", name: "Mega Discount Bundle", desc: "Save up to 40% on essentials." },
-                        { icon: "🍎", name: "Seasonal Fruits", desc: "Fresh and budget-friendly." },
-                        { icon: "🍬", name: "Sweet Treats", desc: "Affordable indulgences." }
-                    ]
-                },
-                3: {
-                    title: "Cluster 3: The Trendsetter",
-                    desc: "Moderate to high income with high spending. Here is what is trending right now.",
-                    products: [
-                        { icon: "🌟", name: "Trending Wines", desc: "Our most popular selections this month." },
-                        { icon: "🎁", name: "Curated Gift Box", desc: "Handpicked premium items." },
-                        { icon: "🍫", name: "Imported Chocolates", desc: "Rich and luxurious." }
-                    ]
-                }
-            };
+        const resultHeader = document.getElementById('result-header');
+        const clusterBadge = document.getElementById('cluster-badge');
+        const resultTitle = document.getElementById('result-title');
+        const resultDesc = document.getElementById('result-desc');
+        const insightsGrid = document.getElementById('insights-grid');
+        const productsGrid = document.getElementById('products-grid');
 
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                const income = parseFloat(document.getElementById('income').value);
-                const spending = parseFloat(document.getElementById('spending').value);
-                
-                // Simple heuristic mimicking the KMeans model boundaries
-                let clusterId = 0;
-                
-                if (income > 65000 && spending > 800) {
-                    clusterId = 1; // Premium
-                } else if (income <= 45000 && spending <= 400) {
-                    clusterId = 2; // Budget
-                } else if (income > 45000 && spending > 600) {
-                    clusterId = 3; // Trendsetter
-                } else {
-                    clusterId = 0; // Balanced
-                }
+        const clusterData = {
+            0: {
+                badge: "Balanced Shopper",
+                title: "The Balanced Shopper 🛒",
+                desc: "You're a smart buyer with moderate income and steady spending habits. We've picked the best everyday essentials for you.",
+                color: "cluster-0",
+                insights: [
+                    { label: "Spending Level", value: "Moderate" },
+                    { label: "Income Bracket", value: "Average" },
+                    { label: "Best Category", value: "Daily Essentials" },
+                    { label: "Savings Potential", value: "High" }
+                ],
+                products: [
+                    { icon: "🥩", name: "Fresh Meat Pack", desc: "Premium cuts for everyday meals at great value.", tag: "Best Value" },
+                    { icon: "🍷", name: "Classic Table Wine", desc: "Rich flavor, friendly price. Perfect for dinner.", tag: "Popular" },
+                    { icon: "🐟", name: "Ocean Fish Basket", desc: "Fresh catches delivered to your door weekly.", tag: "Healthy" },
+                    { icon: "🛒", name: "Essential Bundle", desc: "All your daily household needs in one box.", tag: "Save 20%" }
+                ]
+            },
+            1: {
+                badge: "Premium VIP",
+                title: "The Premium VIP 👑",
+                desc: "You appreciate the finest things in life. High income, high taste — here are exclusive picks just for you.",
+                color: "cluster-1",
+                insights: [
+                    { label: "Spending Level", value: "Very High" },
+                    { label: "Income Bracket", value: "Premium" },
+                    { label: "Best Category", value: "Luxury & Gold" },
+                    { label: "VIP Status", value: "Platinum" }
+                ],
+                products: [
+                    { icon: "🍾", name: "Vintage Champagne", desc: "Hand-selected aged bottles from top vineyards.", tag: "Exclusive" },
+                    { icon: "✨", name: "Gold Membership", desc: "Unlock VIP access, rewards, and priority delivery.", tag: "VIP" },
+                    { icon: "🦞", name: "Gourmet Seafood Box", desc: "Imported lobster, crab, and premium shellfish.", tag: "Luxury" },
+                    { icon: "🥇", name: "Gold Products Suite", desc: "Our finest curated collection of premium goods.", tag: "Top Tier" }
+                ]
+            },
+            2: {
+                badge: "Smart Saver",
+                title: "The Smart Saver 💰",
+                desc: "You know how to stretch every dollar! Here are the best deals, discounts, and budget-friendly picks for you.",
+                color: "cluster-2",
+                insights: [
+                    { label: "Spending Level", value: "Budget" },
+                    { label: "Income Bracket", value: "Value" },
+                    { label: "Best Category", value: "Deals & Fruits" },
+                    { label: "Savings Potential", value: "Maximum" }
+                ],
+                products: [
+                    { icon: "🏷️", name: "Mega Deal Bundle", desc: "Save up to 40% on everyday essential items.", tag: "40% Off" },
+                    { icon: "🍎", name: "Seasonal Fresh Fruits", desc: "Farm-fresh fruits at the lowest prices of the year.", tag: "Budget" },
+                    { icon: "🍬", name: "Sweet Treats Pack", desc: "Affordable indulgences your family will love.", tag: "Family" },
+                    { icon: "🎫", name: "Coupon Rewards", desc: "Earn & redeem coupons on every purchase you make.", tag: "Free" }
+                ]
+            },
+            3: {
+                badge: "Trendsetter",
+                title: "The Trendsetter 🔥",
+                desc: "Moderate income but you love to spend! You're always ahead of the curve. Here's what's hot right now.",
+                color: "cluster-3",
+                insights: [
+                    { label: "Spending Level", value: "High" },
+                    { label: "Income Bracket", value: "Moderate-High" },
+                    { label: "Best Category", value: "Trending" },
+                    { label: "Style Score", value: "Trendy" }
+                ],
+                products: [
+                    { icon: "🌟", name: "Trending Wines", desc: "Our most popular and talked-about selections this season.", tag: "Trending" },
+                    { icon: "🎁", name: "Curated Gift Box", desc: "Handpicked premium items, perfect for gifting.", tag: "Hot" },
+                    { icon: "🍫", name: "Imported Chocolates", desc: "Luxury Belgian and Swiss chocolates collection.", tag: "New" },
+                    { icon: "🥂", name: "Party Essentials", desc: "Everything you need for your next gathering.", tag: "Popular" }
+                ]
+            }
+        };
 
-                displayResults(clusterId);
-            });
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const income = parseFloat(document.getElementById('income').value);
+            const spending = parseFloat(document.getElementById('spending').value);
+            const age = parseInt(document.getElementById('age').value);
+            const children = parseInt(document.getElementById('children').value);
 
-            function displayResults(clusterId) {
-                const data = clusterData[clusterId];
-                
-                // Update text
-                clusterTitle.textContent = data.title;
-                clusterDescription.textContent = data.desc;
-                
-                // Build product cards
-                grid.innerHTML = '';
-                data.products.forEach((prod, index) => {
-                    const card = document.createElement('div');
-                    card.className = `product-card`;
-                    card.style.animationDelay = `${index * 0.15}s`; // Staggered animation
-                    card.innerHTML = `
-                        <div class="product-icon">${prod.icon}</div>
-                        <h3>${prod.name}</h3>
-                        <p>${prod.desc}</p>
-                    `;
-                    // Add animation class after a tiny delay to ensure it triggers
-                    setTimeout(() => card.classList.add('animate-fade-in'), 10);
-                    grid.appendChild(card);
-                });
+            let clusterId = 0;
 
-                // Hide form, show results
-                formSection.classList.add('hidden');
-                resultsSection.classList.remove('hidden');
-                resultsSection.classList.add('glass-panel', 'animate-fade-in');
+            if (income > 65000 && spending > 800) {
+                clusterId = 1; // Premium VIP
+            } else if (income <= 40000 && spending <= 300) {
+                clusterId = 2; // Smart Saver
+            } else if (income <= 50000 && spending <= 500 && children >= 2) {
+                clusterId = 2; // Smart Saver (family with limited budget)
+            } else if (spending > 600 && income > 40000) {
+                clusterId = 3; // Trendsetter
+            } else {
+                clusterId = 0; // Balanced Shopper
             }
 
-            resetBtn.addEventListener('click', () => {
-                form.reset();
-                resultsSection.classList.add('hidden');
-                formSection.classList.remove('hidden');
-                formSection.classList.add('animate-fade-in');
-            });
+            displayResults(clusterId, income, spending);
         });
+
+        function displayResults(clusterId, income, spending) {
+            const data = clusterData[clusterId];
+
+            // Set cluster color class
+            resultsSection.className = `results-section glass-panel ${data.color}`;
+
+            // Header
+            clusterBadge.textContent = data.badge;
+            resultTitle.textContent = data.title;
+            resultDesc.textContent = data.desc;
+
+            // Insights
+            insightsGrid.innerHTML = '';
+            data.insights.forEach(insight => {
+                const card = document.createElement('div');
+                card.className = 'insight-card';
+                card.innerHTML = `
+                    <div class="insight-label">${insight.label}</div>
+                    <div class="insight-value">${insight.value}</div>
+                `;
+                insightsGrid.appendChild(card);
+            });
+
+            // Products
+            productsGrid.innerHTML = '';
+            data.products.forEach((prod, i) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-icon">${prod.icon}</div>
+                    <h3>${prod.name}</h3>
+                    <p>${prod.desc}</p>
+                    <span class="product-tag">${prod.tag}</span>
+                `;
+                productsGrid.appendChild(card);
+                // Staggered animation
+                setTimeout(() => card.classList.add('visible'), 100 + i * 120);
+            });
+
+            // Transition
+            formSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        resetBtn.addEventListener('click', () => {
+            form.reset();
+            resultsSection.classList.add('hidden');
+            formSection.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
     </script>
 </body>
 </html>

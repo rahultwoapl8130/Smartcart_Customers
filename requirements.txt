@@ -1,7 +1,5 @@
 pandas
 matplotlib
 seaborn
-voila
-jupyter
-ipykernel
 scikit-learn
+kneed
