@@ -4,3 +4,4 @@ seaborn
 voila
 jupyter
 ipykernel
+scikit-learn
