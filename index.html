@@ -245,8 +245,23 @@
         }
         .result-desc {
             color: var(--text-muted); font-size: 1rem;
-            max-width: 500px; margin: 0 auto;
+            max-width: 500px; margin: 0 auto 1.5rem;
         }
+
+        /* ===== AI REASONING BOX ===== */
+        .reasoning-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            text-align: left;
+            animation: fadeIn 0.5s ease 0.2s forwards;
+            opacity: 0;
+        }
+        .reasoning-box strong { color: #fff; display: block; margin-bottom: 0.4rem; font-size: 1rem; }
 
         /* ===== PRODUCT GRID ===== */
         .products-label {
@@ -479,6 +494,12 @@
                 <p class="result-desc" id="result-desc"></p>
             </div>
 
+            <!-- AI Reasoning -->
+            <div class="reasoning-box" id="reasoning-box">
+                <strong>🤖 Why we recommend this:</strong>
+                <span id="reasoning-text"></span>
+            </div>
+
             <!-- Insights -->
             <div class="insights-grid" id="insights-grid"></div>
 
@@ -645,10 +666,10 @@
                 clusterId = 0; // Balanced Shopper
             }
 
-            displayResults(clusterId, income, spending, education, living);
+            displayResults(clusterId, income, spending, age, children, education, living);
         });
 
-        function displayResults(clusterId, income, spending, education, living) {
+        function displayResults(clusterId, income, spending, age, children, education, living) {
             const data = clusterData[clusterId];
 
             // Set cluster color class
@@ -658,6 +679,21 @@
             clusterBadge.textContent = data.badge;
             resultTitle.textContent = data.title;
             resultDesc.textContent = data.desc;
+
+            // Generate AI Reasoning Text
+            let reasoning = `Based on your profile as a ${age}-year-old ${education} `;
+            reasoning += living === 'Alone' ? 'living alone' : 'living with a partner';
+            reasoning += `, with an annual income of $${income.toLocaleString()} and monthly spending of $${spending}, `;
+            
+            if (clusterId === 1) reasoning += `our ML model places you in the top tier of our high-value customers. Therefore, we highly recommend our exclusive VIP services and luxury products.`;
+            else if (clusterId === 2) {
+                let kidText = children > 0 ? `especially with ${children} children` : `as a budget-conscious shopper`;
+                reasoning += `your data indicates a value-oriented approach, ${kidText}. We recommend our best money-saving deals and bundles.`;
+            }
+            else if (clusterId === 3) reasoning += `your profile shows strong purchasing power and trend-following behavior. We recommend the latest hot items and seasonal collections.`;
+            else reasoning += `your data aligns with our steady, balanced shopper segment. We recommend practical, everyday essentials with great value.`;
+
+            document.getElementById('reasoning-text').textContent = reasoning;
 
             // Dynamic insights: add user's Education & Living status
             const dynamicInsights = [
