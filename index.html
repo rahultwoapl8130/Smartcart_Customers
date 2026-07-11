@@ -758,12 +758,6 @@
             checkAndRun();
         });
 
-        // Add real-time event listeners to all inputs
-        inputs.forEach(input => {
-            input.addEventListener('input', checkAndRun);
-            input.addEventListener('change', checkAndRun);
-        });
-
         function displayResults(clusterId, income, spending, age, children, education, living) {
             const data = clusterData[clusterId];
 
