@@ -390,6 +390,26 @@
             .insights-grid { grid-template-columns: 1fr; }
             .products-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        /* ===== PAGE TRANSITIONS ===== */
+        .fade-out {
+            animation: fadeOutEffect 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .fade-in {
+            animation: fadeInEffect 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes fadeOutEffect {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-15px); }
+        }
+        @keyframes fadeInEffect {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -726,24 +746,53 @@
                     <span class="product-tag">${prod.tag}</span>
                 `;
                 productsGrid.appendChild(card);
-                // Staggered animation
-                setTimeout(() => card.classList.add('visible'), 100 + i * 120);
             });
 
             // Business Impact
             document.getElementById('business-impact-text').textContent = data.impact;
 
-            // Transition
-            formSection.classList.add('hidden');
-            resultsSection.classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Transition: Fade out form first, then show results smoothly at the top
+            formSection.classList.add('fade-out');
+            
+            setTimeout(() => {
+                formSection.classList.add('hidden');
+                formSection.classList.remove('fade-out');
+                
+                resultsSection.classList.remove('hidden');
+                resultsSection.classList.add('fade-in');
+                window.scrollTo({ top: 0 }); // Snap to top instantly before showing results
+                
+                // Trigger staggered product animations once the new "page" is active
+                data.products.forEach((_, i) => {
+                    const card = productsGrid.children[i];
+                    if (card) {
+                        setTimeout(() => card.classList.add('visible'), 100 + i * 120);
+                    }
+                });
+
+                // Clean up animation class
+                setTimeout(() => {
+                    resultsSection.classList.remove('fade-in');
+                }, 500);
+            }, 300);
         }
 
         resetBtn.addEventListener('click', () => {
-            form.reset();
-            resultsSection.classList.add('hidden');
-            formSection.classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            resultsSection.classList.add('fade-out');
+            
+            setTimeout(() => {
+                form.reset();
+                resultsSection.classList.add('hidden');
+                resultsSection.classList.remove('fade-out');
+                
+                formSection.classList.remove('hidden');
+                formSection.classList.add('fade-in');
+                window.scrollTo({ top: 0 });
+
+                setTimeout(() => {
+                    formSection.classList.remove('fade-in');
+                }, 500);
+            }, 300);
         });
     });
     </script>
