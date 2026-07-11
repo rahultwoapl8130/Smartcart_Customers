@@ -149,8 +149,12 @@
         /* ===== MAIN CONTENT ===== */
         .main-content {
             position: relative; z-index: 1;
-            max-width: 900px; margin: 0 auto;
+            max-width: 1200px; margin: 0 auto;
             padding: 0 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
         }
 
         /* ===== GLASS PANEL ===== */
@@ -410,6 +414,45 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        /* ===== PLACEHOLDER CONTENT ===== */
+        .placeholder-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            min-height: 450px;
+        }
+        .placeholder-icon {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+        .placeholder-content h3 {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+        .placeholder-content p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -507,33 +550,41 @@
         </section>
 
         <!-- RESULTS SECTION -->
-        <section id="results-section" class="results-section glass-panel hidden">
-            <div class="result-header" id="result-header">
-                <div class="cluster-badge" id="cluster-badge">YOUR PROFILE</div>
-                <h2 class="result-title" id="result-title">Loading...</h2>
-                <p class="result-desc" id="result-desc"></p>
+        <section id="results-section" class="results-section glass-panel">
+            <!-- Placeholder state -->
+            <div id="placeholder-content" class="placeholder-content">
+                <div class="placeholder-icon">🤖</div>
+                <h3>AI Recommendation Engine</h3>
+                <p>Fill in your details on the left. Our machine learning model will analyze your profile in real-time and display recommendations instantly.</p>
             </div>
 
-            <!-- AI Reasoning -->
-            <div class="reasoning-box" id="reasoning-box">
-                <strong>🤖 Why we recommend this:</strong>
-                <span id="reasoning-text"></span>
+            <!-- Actual dynamic results -->
+            <div id="actual-results" class="hidden">
+                <div class="result-header" id="result-header">
+                    <div class="cluster-badge" id="cluster-badge">YOUR PROFILE</div>
+                    <h2 class="result-title" id="result-title">Loading...</h2>
+                    <p class="result-desc" id="result-desc"></p>
+                </div>
+    
+                <!-- AI Reasoning -->
+                <div class="reasoning-box" id="reasoning-box">
+                    <strong>🤖 Why we recommend this:</strong>
+                    <span id="reasoning-text"></span>
+                </div>
+    
+                <!-- Insights -->
+                <div class="insights-grid" id="insights-grid"></div>
+    
+                <!-- Products -->
+                <div class="products-label">Recommended For You</div>
+                <div class="products-grid" id="products-grid"></div>
+    
+                <!-- Business Impact -->
+                <div class="business-impact-box" id="business-impact-box">
+                    <h3>💼 Expected Business Impact</h3>
+                    <p id="business-impact-text"></p>
+                </div>
             </div>
-
-            <!-- Insights -->
-            <div class="insights-grid" id="insights-grid"></div>
-
-            <!-- Products -->
-            <div class="products-label">Recommended For You</div>
-            <div class="products-grid" id="products-grid"></div>
-
-            <!-- Business Impact -->
-            <div class="business-impact-box" id="business-impact-box">
-                <h3>💼 Expected Business Impact</h3>
-                <p id="business-impact-text"></p>
-            </div>
-
-            <button class="btn-secondary" id="reset-btn">← Start Over</button>
         </section>
     </div>
 
@@ -636,11 +687,24 @@
             }
         };
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const income = parseFloat(document.getElementById('income').value);
-            const spending = parseFloat(document.getElementById('spending').value);
-            const age = parseInt(document.getElementById('age').value);
+        const inputs = ['income', 'spending', 'age', 'children', 'education', 'living'].map(id => document.getElementById(id));
+        
+        function checkAndRun() {
+            const incomeVal = document.getElementById('income').value;
+            const spendingVal = document.getElementById('spending').value;
+            const ageVal = document.getElementById('age').value;
+            
+            // Show placeholder if any core field is empty
+            if (!incomeVal || !spendingVal || !ageVal) {
+                document.getElementById('placeholder-content').classList.remove('hidden');
+                document.getElementById('actual-results').classList.add('hidden');
+                resultsSection.className = `results-section glass-panel`;
+                return;
+            }
+
+            const income = parseFloat(incomeVal);
+            const spending = parseFloat(spendingVal);
+            const age = parseInt(ageVal);
             const children = parseInt(document.getElementById('children').value);
             const education = document.getElementById('education').value;
             const living = document.getElementById('living').value;
@@ -687,10 +751,25 @@
             }
 
             displayResults(clusterId, income, spending, age, children, education, living);
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent page reload if button is clicked
+            checkAndRun();
+        });
+
+        // Add real-time event listeners to all inputs
+        inputs.forEach(input => {
+            input.addEventListener('input', checkAndRun);
+            input.addEventListener('change', checkAndRun);
         });
 
         function displayResults(clusterId, income, spending, age, children, education, living) {
             const data = clusterData[clusterId];
+
+            // Hide placeholder & show results container
+            document.getElementById('placeholder-content').classList.add('hidden');
+            document.getElementById('actual-results').classList.remove('hidden');
 
             // Set cluster color class
             resultsSection.className = `results-section glass-panel ${data.color}`;
@@ -746,54 +825,13 @@
                     <span class="product-tag">${prod.tag}</span>
                 `;
                 productsGrid.appendChild(card);
+                // Trigger animation
+                setTimeout(() => card.classList.add('visible'), 50 + i * 50);
             });
 
             // Business Impact
             document.getElementById('business-impact-text').textContent = data.impact;
-
-            // Transition: Fade out form first, then show results smoothly at the top
-            formSection.classList.add('fade-out');
-            
-            setTimeout(() => {
-                formSection.classList.add('hidden');
-                formSection.classList.remove('fade-out');
-                
-                resultsSection.classList.remove('hidden');
-                resultsSection.classList.add('fade-in');
-                window.scrollTo({ top: 0 }); // Snap to top instantly before showing results
-                
-                // Trigger staggered product animations once the new "page" is active
-                data.products.forEach((_, i) => {
-                    const card = productsGrid.children[i];
-                    if (card) {
-                        setTimeout(() => card.classList.add('visible'), 100 + i * 120);
-                    }
-                });
-
-                // Clean up animation class
-                setTimeout(() => {
-                    resultsSection.classList.remove('fade-in');
-                }, 500);
-            }, 300);
         }
-
-        resetBtn.addEventListener('click', () => {
-            resultsSection.classList.add('fade-out');
-            
-            setTimeout(() => {
-                form.reset();
-                resultsSection.classList.add('hidden');
-                resultsSection.classList.remove('fade-out');
-                
-                formSection.classList.remove('hidden');
-                formSection.classList.add('fade-in');
-                window.scrollTo({ top: 0 });
-
-                setTimeout(() => {
-                    formSection.classList.remove('fade-in');
-                }, 500);
-            }, 300);
-        });
     });
     </script>
 </body>
