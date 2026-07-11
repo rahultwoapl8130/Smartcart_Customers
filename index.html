@@ -424,6 +424,21 @@
                             <option value="3">3+ Children</option>
                         </select>
                     </div>
+                    <div class="input-group">
+                        <label for="education">Education Level</label>
+                        <select id="education" required>
+                            <option value="Undergraduate">Undergraduate (Basic / 2n Cycle)</option>
+                            <option value="Graduate" selected>Graduate</option>
+                            <option value="Postgraduate">Postgraduate (Master / PhD)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="living">Living With</label>
+                        <select id="living" required>
+                            <option value="Alone">Alone (Single / Divorced / Widow)</option>
+                            <option value="Partner" selected>Partner (Married / Together)</option>
+                        </select>
+                    </div>
                     <div class="input-group full-width">
                         <button type="submit" class="btn-primary">🚀 Get My Recommendations</button>
                     </div>
@@ -551,25 +566,50 @@
             const spending = parseFloat(document.getElementById('spending').value);
             const age = parseInt(document.getElementById('age').value);
             const children = parseInt(document.getElementById('children').value);
+            const education = document.getElementById('education').value;
+            const living = document.getElementById('living').value;
 
             let clusterId = 0;
 
-            if (income > 65000 && spending > 800) {
+            // Scoring system based on all 6 features
+            let score = 0;
+
+            // Income factor
+            if (income > 70000) score += 3;
+            else if (income > 50000) score += 2;
+            else if (income > 30000) score += 1;
+
+            // Spending factor
+            if (spending > 800) score += 3;
+            else if (spending > 500) score += 2;
+            else if (spending > 250) score += 1;
+
+            // Education factor
+            if (education === 'Postgraduate') score += 2;
+            else if (education === 'Graduate') score += 1;
+
+            // Living alone tends toward budget or premium extremes
+            if (living === 'Alone' && income > 60000) score += 1;
+            if (living === 'Partner' && children >= 2 && income < 50000) score -= 1;
+
+            // Children factor (more children = more budget-conscious)
+            if (children >= 2) score -= 1;
+
+            // Classification
+            if (score >= 7) {
                 clusterId = 1; // Premium VIP
-            } else if (income <= 40000 && spending <= 300) {
+            } else if (score <= 2) {
                 clusterId = 2; // Smart Saver
-            } else if (income <= 50000 && spending <= 500 && children >= 2) {
-                clusterId = 2; // Smart Saver (family with limited budget)
-            } else if (spending > 600 && income > 40000) {
+            } else if (score >= 5 && spending > 500) {
                 clusterId = 3; // Trendsetter
             } else {
                 clusterId = 0; // Balanced Shopper
             }
 
-            displayResults(clusterId, income, spending);
+            displayResults(clusterId, income, spending, education, living);
         });
 
-        function displayResults(clusterId, income, spending) {
+        function displayResults(clusterId, income, spending, education, living) {
             const data = clusterData[clusterId];
 
             // Set cluster color class
@@ -580,9 +620,16 @@
             resultTitle.textContent = data.title;
             resultDesc.textContent = data.desc;
 
+            // Dynamic insights: add user's Education & Living status
+            const dynamicInsights = [
+                ...data.insights,
+                { label: "Education", value: education },
+                { label: "Living With", value: living }
+            ];
+
             // Insights
             insightsGrid.innerHTML = '';
-            data.insights.forEach(insight => {
+            dynamicInsights.forEach(insight => {
                 const card = document.createElement('div');
                 card.className = 'insight-card';
                 card.innerHTML = `
