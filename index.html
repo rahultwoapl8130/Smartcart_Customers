@@ -290,6 +290,30 @@
         .cluster-2 .product-tag { background: rgba(16, 185, 129, 0.1); color: #34d399; }
         .cluster-3 .product-tag { background: rgba(236, 72, 153, 0.1); color: #f472b6; }
 
+        /* ===== BUSINESS IMPACT BOX ===== */
+        .business-impact-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+            animation: fadeIn 0.5s ease 0.6s forwards;
+            opacity: 0;
+        }
+        .business-impact-box h3 {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff;
+        }
+        .business-impact-box p {
+            color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;
+        }
+        .cluster-0 .business-impact-box { border-left-color: #fbbf24; }
+        .cluster-1 .business-impact-box { border-left-color: #a78bfa; }
+        .cluster-2 .business-impact-box { border-left-color: #34d399; }
+        .cluster-3 .business-impact-box { border-left-color: #f472b6; }
+
+
         /* ===== INSIGHT CARDS ===== */
         .insights-grid {
             display: grid; grid-template-columns: 1fr 1fr;
@@ -462,6 +486,12 @@
             <div class="products-label">Recommended For You</div>
             <div class="products-grid" id="products-grid"></div>
 
+            <!-- Business Impact -->
+            <div class="business-impact-box" id="business-impact-box">
+                <h3>💼 Expected Business Impact</h3>
+                <p id="business-impact-text"></p>
+            </div>
+
             <button class="btn-secondary" id="reset-btn">← Start Over</button>
         </section>
     </div>
@@ -492,6 +522,7 @@
                 title: "The Balanced Shopper 🛒",
                 desc: "You're a smart buyer with moderate income and steady spending habits. We've picked the best everyday essentials for you.",
                 color: "cluster-0",
+                impact: "Targeting this segment with weekly bundle deals and cross-selling everyday essentials increases purchase frequency by 15-20% and drives steady, predictable revenue.",
                 insights: [
                     { label: "Spending Level", value: "Moderate" },
                     { label: "Income Bracket", value: "Average" },
@@ -510,6 +541,7 @@
                 title: "The Premium VIP 👑",
                 desc: "You appreciate the finest things in life. High income, high taste — here are exclusive picks just for you.",
                 color: "cluster-1",
+                impact: "Launching an exclusive VIP loyalty program and offering early access to luxury products for this high-value segment increases Average Order Value (AOV) by 25-30%.",
                 insights: [
                     { label: "Spending Level", value: "Very High" },
                     { label: "Income Bracket", value: "Premium" },
@@ -528,6 +560,7 @@
                 title: "The Smart Saver 💰",
                 desc: "You know how to stretch every dollar! Here are the best deals, discounts, and budget-friendly picks for you.",
                 color: "cluster-2",
+                impact: "Offering personalized discount coupons and flash sales to this budget-conscious segment successfully converts price-sensitive users and reduces churn by 20%.",
                 insights: [
                     { label: "Spending Level", value: "Budget" },
                     { label: "Income Bracket", value: "Value" },
@@ -546,6 +579,7 @@
                 title: "The Trendsetter 🔥",
                 desc: "Moderate income but you love to spend! You're always ahead of the curve. Here's what's hot right now.",
                 color: "cluster-3",
+                impact: "Promoting trending and seasonal items via social media campaigns capitalizes on their impulse buying behavior, boosting engagement and sales by 30%.",
                 insights: [
                     { label: "Spending Level", value: "High" },
                     { label: "Income Bracket", value: "Moderate-High" },
@@ -659,6 +693,9 @@
                 // Staggered animation
                 setTimeout(() => card.classList.add('visible'), 100 + i * 120);
             });
+
+            // Business Impact
+            document.getElementById('business-impact-text').textContent = data.impact;
 
             // Transition
             formSection.classList.add('hidden');
