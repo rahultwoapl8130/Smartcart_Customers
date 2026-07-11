@@ -99,6 +99,7 @@ The ML cluster boundaries are translated into a **score-based classification sys
 |--------|-----------|-------|
 | **Income** | > $70K → +3, > $50K → +2, > $30K → +1 | 0 to +3 |
 | **Spending** | > $800 → +3, > $500 → +2, > $250 → +1 | 0 to +3 |
+| **Age** | > 55 → +1, < 30 with high spending → +1 | 0 to +1 |
 | **Education** | Postgraduate → +2, Graduate → +1 | 0 to +2 |
 | **Living** | Alone + High Income → +1 | 0 to +1 |
 | **Children** | 2+ Children → -1 | -1 to 0 |
