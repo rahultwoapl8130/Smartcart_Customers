@@ -14,6 +14,7 @@
 ## 🚀 Features
 
 - **AI-Powered Clustering** — Uses K-Means & Agglomerative Clustering to segment 2,200+ customers into 4 distinct groups.
+- **6-Feature Smart Profiling** — Takes Income, Spending, Age, Children, Education, and Living Status to classify users.
 - **Personalized Recommendations** — Enter your profile and instantly get product recommendations tailored to your cluster.
 - **Premium UI** — Glassmorphism design, animated gradients, responsive layout, and smooth micro-animations.
 - **No Code Visible** — The end-user sees only a beautiful, interactive interface — no Python, no Jupyter.
@@ -79,18 +80,46 @@ SmartCart uses **unsupervised machine learning** to automatically segment custom
 
 ### Phase 2: Frontend (HTML/CSS/JS)
 
-The ML cluster boundaries are translated into simple JavaScript rules, so the app runs **100% client-side** with zero backend dependencies.
+The ML cluster boundaries are translated into a **score-based classification system** in JavaScript. The app takes **6 user inputs** and calculates a score to determine the cluster — running **100% client-side** with zero backend dependencies.
+
+#### Input Features Used
+
+| # | Feature | Type | Source (from ML Model) |
+|---|---------|------|------------------------|
+| 1 | Annual Income | Number | `df["Income"]` |
+| 2 | Monthly Spending | Number | `df["Total_spending"]` |
+| 3 | Age | Number | `df["Age"]` |
+| 4 | Total Children | Dropdown | `df["Total_Children"]` (Kidhome + Teenhome) |
+| 5 | Education Level | Dropdown | `df["Education"]` (Undergraduate / Graduate / Postgraduate) |
+| 6 | Living With | Dropdown | `df["Living_With"]` (Alone / Partner) |
+
+#### Scoring Algorithm
+
+| Factor | Condition | Score |
+|--------|-----------|-------|
+| **Income** | > $70K → +3, > $50K → +2, > $30K → +1 | 0 to +3 |
+| **Spending** | > $800 → +3, > $500 → +2, > $250 → +1 | 0 to +3 |
+| **Education** | Postgraduate → +2, Graduate → +1 | 0 to +2 |
+| **Living** | Alone + High Income → +1 | 0 to +1 |
+| **Children** | 2+ Children → -1 | -1 to 0 |
+
+| Total Score | Assigned Cluster |
+|-------------|------------------|
+| **7+** | 👑 Premium VIP |
+| **5-6** (+ high spending) | 🔥 Trendsetter |
+| **3-4** | 🛒 Balanced Shopper |
+| **0-2** | 💰 Smart Saver |
 
 ---
 
 ## 📊 Customer Segments (4 Clusters)
 
-| Cluster | Name | Profile | Recommendations |
-|---------|------|---------|-----------------|
-| **0** | 🛒 Balanced Shopper | Average income, moderate spending | Fresh Meat, Table Wine, Fish, Essentials |
-| **1** | 👑 Premium VIP | High income, high spending | Vintage Champagne, Gold Membership, Gourmet Seafood |
-| **2** | 💰 Smart Saver | Low income, budget-conscious | Mega Deals, Seasonal Fruits, Sweet Treats, Coupons |
-| **3** | 🔥 Trendsetter | Moderate income, high spending | Trending Wines, Gift Boxes, Imported Chocolates |
+| Cluster | Name | Profile | Education | Living | Recommendations |
+|---------|------|---------|-----------|--------|-----------------|
+| **0** | 🛒 Balanced Shopper | Average income, moderate spending | Graduate | Partner | Fresh Meat, Table Wine, Fish, Essentials |
+| **1** | 👑 Premium VIP | High income, high spending | Postgraduate | Alone/Partner | Vintage Champagne, Gold Membership, Gourmet Seafood |
+| **2** | 💰 Smart Saver | Low income, budget-conscious | Undergraduate | Partner (2+ kids) | Mega Deals, Seasonal Fruits, Sweet Treats, Coupons |
+| **3** | 🔥 Trendsetter | Moderate-high income, high spending | Graduate/Postgraduate | Partner | Trending Wines, Gift Boxes, Imported Chocolates |
 
 ---
 
@@ -98,11 +127,13 @@ The ML cluster boundaries are translated into simple JavaScript rules, so the ap
 
 ```
 smartcart_customers/
-├── index.html                 # Frontend Web Application (single file)
+├── index.html                 # Frontend Web App (HTML + CSS + JS in single file)
 ├── smartcart_customers.py     # Python ML Script (data analysis & clustering)
 ├── smartcart_customers.csv    # Dataset (2,240 customers × 22 features)
 ├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+├── .gitignore                 # Git ignore rules
+├── LICENSE                    # MIT License
+└── README.md                  # Project documentation
 ```
 
 ---
